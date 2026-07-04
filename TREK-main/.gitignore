@@ -66,3 +66,17 @@ test-data
 
 .run
 .full-review
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.example
+
+# Dependencies and build folders
+node_modules/
+dist/
+build/
+.DS_Store
