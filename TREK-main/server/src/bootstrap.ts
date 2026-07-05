@@ -35,11 +35,29 @@ import { applyPlatformUploads, applyPlatformTransport, applyPlatformStatic } fro
  */
 export async function buildApp(): Promise<INestApplication> {
   const app = await NestFactory.create(AppModule, new ExpressAdapter());
+  
+  // --- CRITICAL CORS FIX ---
+  // Must be applied immediately upon creation, before middleware and init
+  app.enableCors({
+    origin: [
+      'https://trek-the-travel-partner-os94c6je2-siddharth229.vercel.app',
+      'https://trek-thetravelpartner.vercel.app'
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type,Authorization,X-Requested-With,Accept',
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  });
+  // -------------------------
+
   const instance = app.getHttpAdapter().getInstance();
+  
   applyGlobalMiddleware(instance, { bodyParser: false });
   applyPlatformUploads(instance);
   applyPlatformTransport(instance);
   applyPlatformStatic(instance);
+  
   await app.init();
   return app;
 }
