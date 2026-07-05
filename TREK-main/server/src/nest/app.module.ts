@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { DatabaseModule } from './database/database.module';
-import { HealthController } from './health/health.controller';
+import { HealthController, RootHealthController } from './health/health.controller';
 import { HealthService } from './health/health.service';
 import { WeatherModule } from './weather/weather.module';
 import { AirportsModule } from './airports/airports.module';
@@ -53,7 +53,7 @@ import { IdempotencyInterceptor } from './common/idempotency.interceptor';
  */
 @Module({
   imports: [DatabaseModule, WeatherModule, AirportsModule, ConfigModule, SystemNoticesModule, MapsModule, CategoriesModule, TagsModule, NotificationsModule, AtlasModule, VacayModule, PackingModule, TodoModule, BudgetModule, ReservationsModule, DaysModule, AssignmentsModule, PlacesModule, TripsModule, CollabModule, FilesModule, PhotosModule, MemoriesModule, AirtrailModule, JourneyModule, ShareModule, SettingsModule, BackupModule, AuthModule, OidcModule, OauthModule, AdminModule, AddonsModule, BookingImportModule, AiModule, FlightModule, HotelModule, TaxiModule, CarModule, VoiceModule],
-  controllers: [HealthController],
+  controllers: [HealthController, RootHealthController],
   providers: [
     HealthService,
     // SPA fallback must run before the generic TREK exception filter so unmatched

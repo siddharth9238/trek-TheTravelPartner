@@ -11,10 +11,7 @@ const echoSchema = z.object({ name: z.string().min(1) });
 
 /**
  * Foundation smoke endpoints for the co-hosted NestJS app.
- * Proves: boot, routing, type-based DI, the shared SQLite connection, the
- * JWT-cookie auth guard, and the Zod validation pipe + error-envelope parity.
- *
- * Lives under /api/_nest/* so it never collides with the legacy Express API.
+ * Domain testing under /api/_nest/* so it never collides with the legacy Express API.
  */
 @Controller('api/_nest')
 export class HealthController {
@@ -37,5 +34,19 @@ export class HealthController {
   @UseGuards(JwtAuthGuard)
   echo(@Body(new ZodValidationPipe(echoSchema)) body: z.infer<typeof echoSchema>) {
     return { youSent: body };
+  }
+}
+
+/**
+ * Root health check controller specifically mapping to Render's default /healthz ping.
+ * This runs outside the /api/_nest prefix so Render can access it directly at the root.
+ */
+@Controller()
+export class RootHealthController {
+  constructor(private readonly healthService: HealthService) {}
+
+  @Get('healthz')
+  healthCheck() {
+    return this.healthService.info();
   }
 }
