@@ -123,7 +123,7 @@ function translateRateLimit(): string {
 }
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: '/api',
+  baseURL: 'https://trek-thetravelpartner.onrender.com/api',
   withCredentials: true,
   timeout: 8000,
   headers: {
