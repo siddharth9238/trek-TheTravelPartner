@@ -93,23 +93,28 @@ const onListen = () => {
 let server: http.Server;
 let nestApp: INestApplication;
 
-// Strangler toggle: prefixes served by Nest (env-overridable, instant rollback).
 async function bootstrap(): Promise<void> {
-  // The whole surface runs on the single NestJS app now (Express decommissioned):
-  // global pipeline + /uploads + every /api domain + the platform/transport routes
-  // (/mcp, /.well-known, OAuth SDK, SPA catch-all). buildApp() owns the composition
-  // order; it is shared with the integration-test harness so they can't drift.
   nestApp = await buildApp();
 
-  // --- CRITICAL FIX: ENABLE CORS HERE ---
+  // FIX: Force CORS as the very first interaction
+  // We apply this to the underlying Express/Fastify adapter directly
   nestApp.enableCors({
-    origin: 'https://trek-the-travel-partner-os94c6je2-siddharth229.vercel.app',
+    origin: [
+      'https://trek-the-travel-partner-os94c6je2-siddharth229.vercel.app',
+      'https://trek-thetravelpartner.vercel.app'
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    allowedHeaders: 'Content-Type,Authorization,X-Requested-With,Accept',
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   });
-  // --------------------------------------
 
   server = http.createServer(nestApp.getHttpAdapter().getInstance());
+  
+  // Important: If you have any custom middleware in buildApp(), 
+  // ensure they do not perform auth checks on OPTIONS requests.
+  
   if (HOST) server.listen(PORT, HOST, onListen);
   else server.listen(PORT, onListen);
 }
