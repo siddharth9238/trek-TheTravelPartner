@@ -6,30 +6,30 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { ZodValidationPipe } from '../common/zod-validation.pipe';
 
-// Local demo schema (real domains import their schema from @trek/shared).
 const echoSchema = z.object({ name: z.string().min(1) });
 
 /**
- * Foundation smoke endpoints for the co-hosted NestJS app.
- * Domain testing under /api/_nest/* so it never collides with the legacy Express API.
+ * Foundation smoke endpoints.
+ * Path: /api/_nest/health
  */
-@Controller('api/_nest')
+@Controller('api/_nest/health')
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
-  @Get('health')
+  // This is now reached at: GET /api/_nest/health
+  @Get() 
   getHealth() {
     return { ok: true, ...this.healthService.info() };
   }
 
-  /** Guarded: returns the authenticated user, proving JwtAuthGuard + @CurrentUser. */
+  // This is now reached at: GET /api/_nest/health/me
   @Get('me')
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: User) {
     return user;
   }
 
-  /** Validated: proves the Zod pipe (400 + { error } on failure) and body parsing. */
+  // This is now reached at: POST /api/_nest/health/echo
   @Post('echo')
   @UseGuards(JwtAuthGuard)
   echo(@Body(new ZodValidationPipe(echoSchema)) body: z.infer<typeof echoSchema>) {
@@ -38,8 +38,8 @@ export class HealthController {
 }
 
 /**
- * Root health check controller specifically mapping to Render's default /healthz ping.
- * This runs outside the /api/_nest prefix so Render can access it directly at the root.
+ * Root health check for Render.
+ * Path: /healthz
  */
 @Controller()
 export class RootHealthController {
