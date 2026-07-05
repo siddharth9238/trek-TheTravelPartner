@@ -127,7 +127,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
 
 export const apiClient: AxiosInstance = axios.create({
   // Notice the /api added here!
-  baseURL: `${API_URL}/api`, 
+  baseURL: API_URL, 
   withCredentials: true,
   timeout: 8000,
   headers: {
