@@ -51,7 +51,7 @@ const AVATAR_UPLOAD = {
 // ============================================================================
 // 1. PUBLIC ROUTES (No Auth Required for Login, Guest, and App Config)
 // ============================================================================
-@Controller('api/auth')
+@Controller(['auth', 'api/auth']) // Listens to both!
 export class PublicAuthController {
   constructor(private readonly auth: AuthService, private readonly rl: RateLimitService) {}
 
