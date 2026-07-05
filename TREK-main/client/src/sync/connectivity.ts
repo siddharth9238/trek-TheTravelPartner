@@ -15,7 +15,8 @@ async function probe(): Promise<void> {
   try {
     const ctrl = new AbortController()
     const t = setTimeout(() => ctrl.abort(), PROBE_TIMEOUT_MS)
-    const res = await fetch('/api/health', {
+    const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3005'
+    const res = await fetch(`${API_BASE}/api/health`, {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store',

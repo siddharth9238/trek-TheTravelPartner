@@ -790,14 +790,8 @@ export const carsApi = {
 export const aiApi = {
   status: () => apiClient.get('/ai/status').then(r => r.data),
   chat: async (data: AiChatRequest): Promise<{ response: string }> => {
-    const response = await fetch('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    })
-    if (!response.ok) throw new Error('AI chat failed')
-    return response.json()
+    const response = await apiClient.post('/ai/chat', data).then(r => r.data)
+    return response
   },
   generateItinerary: (data: AiItineraryRequest): Promise<AiItineraryResponse> =>
     apiClient.post('/ai/itinerary', data).then(r => r.data),

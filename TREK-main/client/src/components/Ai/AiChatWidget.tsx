@@ -5,6 +5,8 @@ import rehypeSanitize from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 import { useTranslation } from '../../i18n';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -50,7 +52,7 @@ export default function AiChatWidget({ tripId, tripTitle }: AiChatProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/ai/chat', {
+      const response = await fetch(`${API_BASE}/api/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

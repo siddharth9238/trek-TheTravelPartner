@@ -3,6 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import TravelNavbar from '../components/Layout/TravelNavbar';
 import { useTranslation } from '../i18n';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+
 export default function VoiceAssistantPage() {
   const { t } = useTranslation();
   const [isListening, setIsListening] = useState(false);
