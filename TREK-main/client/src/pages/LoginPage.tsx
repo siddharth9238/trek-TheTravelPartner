@@ -681,31 +681,27 @@ export default function LoginPage(): React.ReactElement {
             </>
           )}
 
-          {/* Demo login button */}
-          {appConfig?.demo_mode && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
-                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-                <span style={{ fontSize: 12, color: '#9ca3af' }}>{t('common.or')}</span>
-                <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
-              </div>
-              <button onClick={handleDemoLogin} disabled={isLoading}
-                style={{
-                  marginTop: 16, width: '100%', padding: '12px',
-                  background: '#111827', color: 'white',
-                  border: 'none', borderRadius: 12,
-                  fontSize: 14, fontWeight: 700, cursor: isLoading ? 'default' : 'pointer',
-                  fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  opacity: isLoading ? 0.7 : 1, transition: 'opacity 0.15s',
-                }}
-                onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => { if (!isLoading) e.currentTarget.style.background = '#1f2937' }}
-                onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = '#111827' }}
-              >
-                <User size={16} />
-                {t('Continue As Guest')}
-              </button>
-            </>
-          )}
+          {/* Guest login button (ALWAYS VISIBLE NOW) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 16 }}>
+            <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+            <span style={{ fontSize: 12, color: '#9ca3af' }}>{t('common.or')}</span>
+            <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+          </div>
+          <button type="button" onClick={handleDemoLogin} disabled={isLoading}
+            style={{
+              marginTop: 16, width: '100%', padding: '12px',
+              background: '#111827', color: 'white',
+              border: 'none', borderRadius: 12,
+              fontSize: 14, fontWeight: 700, cursor: isLoading ? 'default' : 'pointer',
+              fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              opacity: isLoading ? 0.7 : 1, transition: 'opacity 0.15s',
+            }}
+            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => { if (!isLoading) e.currentTarget.style.background = '#1f2937' }}
+            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = '#111827' }}
+          >
+            <User size={16} />
+            {t('Continue As Guest')}
+          </button>
         </div>
       </div>
 
