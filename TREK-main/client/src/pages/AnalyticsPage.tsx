@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from '../i18n'
 import { Plane, Hotel, MapPin } from 'lucide-react'
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+
 interface AnalyticsData {
   totalTrips: number
   visitedCountries: string[]
@@ -24,7 +26,7 @@ export default function AnalyticsPage() {
   const fetchAnalytics = async () => {
     setLoading(true)
     try {
-      const response = await fetch('/api/ai/analytics', { method: 'POST' })
+      const response = await fetch(`${API_BASE}/api/ai/analytics`, { method: 'POST' })
       const result = await response.json()
       setData(result)
     } catch (e) {

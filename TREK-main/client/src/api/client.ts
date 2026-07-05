@@ -127,7 +127,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
 
 export const apiClient: AxiosInstance = axios.create({
   // Notice the /api added here!
-  baseURL: API_URL, 
+  baseURL: `${API_URL}/api`, 
   withCredentials: true,
   timeout: 8000,
   headers: {
@@ -246,45 +246,58 @@ apiClient.interceptors.response.use(
 )
 
 export const authApi = {
-  register: (data: RegisterRequest) => apiClient.post('/auth/register', data).then(r => r.data),
-  validateInvite: (token: string) => apiClient.get(`/auth/invite/${token}`).then(r => r.data),
-  login: (data: LoginRequest) => apiClient.post('/auth/login', data).then(r => r.data),
-  verifyMfaLogin: (data: MfaVerifyLoginRequest) => apiClient.post('/auth/mfa/verify-login', data).then(r => r.data),
-  mfaSetup: () => apiClient.post('/auth/mfa/setup', {}).then(r => r.data),
-  mfaEnable: (data: MfaEnableRequest) => apiClient.post('/auth/mfa/enable', data).then(r => r.data as { success: boolean; mfa_enabled: boolean; backup_codes?: string[] }),
-  mfaDisable: (data: { password: string; code: string }) => apiClient.post('/auth/mfa/disable', data).then(r => r.data),
-  me: () => apiClient.get('/auth/me').then(r => r.data),
-  updateMapsKey: (key: string | null) => apiClient.put('/auth/me/maps-key', { maps_api_key: key }).then(r => r.data),
-  updateApiKeys: (data: Record<string, string | null>) => apiClient.put('/auth/me/api-keys', data).then(r => r.data),
-  updateSettings: (data: Record<string, unknown>) => apiClient.put('/auth/me/settings', data).then(r => r.data),
-  getSettings: () => apiClient.get('/auth/me/settings').then(r => r.data),
-  listUsers: () => apiClient.get('/auth/users').then(r => r.data),
-  uploadAvatar: (formData: FormData) => apiClient.post('/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
-  deleteAvatar: () => apiClient.delete('/auth/avatar').then(r => r.data),
-  getAppConfig: () => apiClient.get('/auth/app-config').then(r => r.data),
-  updateAppSettings: (data: Record<string, unknown>) => apiClient.put('/auth/app-settings', data).then(r => r.data),
-  validateKeys: () => apiClient.get('/auth/validate-keys').then(r => r.data),
-  travelStats: () => apiClient.get('/auth/travel-stats').then(r => r.data),
-  changePassword: (data: ChangePasswordRequest) => apiClient.put('/auth/me/password', data).then(r => r.data),
-  forgotPassword: (data: ForgotPasswordRequest) => apiClient.post('/auth/forgot-password', data).then(r => r.data as { ok: true }),
-  resetPassword: (data: ResetPasswordRequest) => apiClient.post('/auth/reset-password', data).then(r => r.data as { success?: true; mfa_required?: true }),
-  deleteOwnAccount: () => apiClient.delete('/auth/me').then(r => r.data),
-  demoLogin: () => apiClient.post('/auth/demo-login').then(r => r.data),
-  mcpTokens: {
-    list: () => apiClient.get('/auth/mcp-tokens').then(r => r.data),
-    create: (name: string) => apiClient.post('/auth/mcp-tokens', { name } satisfies McpTokenCreateRequest).then(r => r.data),
-    delete: (id: number) => apiClient.delete(`/auth/mcp-tokens/${id}`).then(r => r.data),
-  },
-  passkey: {
-    registerOptions: (password: string) => apiClient.post('/auth/passkey/register/options', { password }).then(r => r.data),
-    registerVerify: (attestationResponse: unknown, name?: string) => apiClient.post('/auth/passkey/register/verify', { attestationResponse, name }).then(r => r.data),
-    loginOptions: () => apiClient.post('/auth/passkey/login/options', {}).then(r => r.data),
-    loginVerify: (assertionResponse: unknown) => apiClient.post('/auth/passkey/login/verify', { assertionResponse }).then(r => r.data as { token: string; user: Record<string, unknown> }),
-    list: () => apiClient.get('/auth/passkey/credentials').then(r => r.data as { credentials: PasskeyCredential[] }),
-    rename: (id: number, name: string) => apiClient.patch(`/auth/passkey/credentials/${id}`, { name }).then(r => r.data),
-    delete: (id: number, password: string) => apiClient.delete(`/auth/passkey/credentials/${id}`, { data: { password } }).then(r => r.data),
-  },
-}
+  register: (data: RegisterRequest) => apiClient.post('/api/auth/register', data).then(r => r.data),
+  validateInvite: (token: string) => apiClient.get(`/api/auth/invite/${token}`).then(r => r.data),
+  
+  // Standard Login
+  login: (data: LoginRequest) => apiClient.post('/api/auth/login', data).then(r => r.data),
+  
+  verifyMfaLogin: (data: MfaVerifyLoginRequest) => apiClient.post('/api/auth/mfa/verify-login', data).then(r => r.data),
+  mfaSetup: () => apiClient.post('/api/auth/mfa/setup', {}).then(r => r.data),
+  mfaEnable: (data: MfaEnableRequest) => apiClient.post('/api/auth/mfa/enable', data).then(r => r.data as { success: boolean; mfa_enabled: boolean; backup_codes?: string[] }),
+  mfaDisable: (data: { password: string; code: string }) => apiClient.post('/api/auth/mfa/disable', data).then(r => r.data),
+  
+  me: () => apiClient.get('/api/auth/me').then(r => r.data),
+  
+  updateMapsKey: (key: string | null) => apiClient.put('/api/auth/me/maps-key', { maps_api_key: key }).then(r => r.data),
+  updateApiKeys: (data: Record<string, string | null>) => apiClient.put('/api/auth/me/api-keys', data).then(r => r.data),
+  updateSettings: (data: Record<string, unknown>) => apiClient.put('/api/auth/me/settings', data).then(r => r.data),
+  getSettings: () => apiClient.get('/api/auth/me/settings').then(r => r.data),
+  
+  listUsers: () => apiClient.get('/api/auth/users').then(r => r.data),
+  uploadAvatar: (formData: FormData) => apiClient.post('/api/auth/avatar', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(r => r.data),
+  deleteAvatar: () => apiClient.delete('/api/auth/avatar').then(r => r.data),
+  
+  getAppConfig: () => apiClient.get('/api/auth/app-config').then(r => r.data),
+  updateAppSettings: (data: Record<string, unknown>) => apiClient.put('/api/auth/app-settings', data).then(r => r.data),
+  
+  validateKeys: () => apiClient.get('/api/auth/validate-keys').then(r => r.data),
+  travelStats: () => apiClient.get('/api/auth/travel-stats').then(r => r.data),
+  
+  changePassword: (data: ChangePasswordRequest) => apiClient.put('/api/auth/me/password', data).then(r => r.data),
+  forgotPassword: (data: ForgotPasswordRequest) => apiClient.post('/api/auth/forgot-password', data).then(r => r.data as { ok: true }),
+  resetPassword: (data: ResetPasswordRequest) => apiClient.post('/api/auth/reset-password', data).then(r => r.data as { success?: true; mfa_required?: true }),
+  
+  deleteOwnAccount: () => apiClient.delete('/api/auth/me').then(r => r.data),
+  
+  demoLogin: () => apiClient.post('/api/auth/demo-login').then(r => r.data),
+
+  // --- NEW: GUEST LOGIN ---
+  guestLogin: () => apiClient.post('/api/auth/guest').then(r => r.data),
+};
+
+export const passkeyApi = {
+  registerOptions: (password: string) => apiClient.post('/auth/passkey/register/options', { password }).then(r => r.data),
+  registerVerify: (attestationResponse: unknown, name?: string) => apiClient.post('/auth/passkey/register/verify', { attestationResponse, name }).then(r => r.data),
+  loginOptions: () => apiClient.post('/auth/passkey/login/options', {}).then(r => r.data),
+  loginVerify: (assertionResponse: unknown) => apiClient.post('/auth/passkey/login/verify', { assertionResponse }).then(r => r.data as { token: string; user: Record<string, unknown> }),
+  list: () => apiClient.get('/auth/passkey/credentials').then(r => r.data as { credentials: PasskeyCredential[] }),
+  rename: (id: number, name: string) => apiClient.patch(`/auth/passkey/credentials/${id}`, { name }).then(r => r.data),
+  delete: (id: number, password: string) => apiClient.delete(`/auth/passkey/credentials/${id}`, { data: { password } }).then(r => r.data),
+};
+export const authApi ={
+  logout: () => apiClient.post('/auth/logout').then(r => r.data),
+};
 
 export interface PasskeyCredential {
   id: number

@@ -192,7 +192,7 @@ export const useAuthStore = create<AuthState>()(
     disconnect()
     useSystemNoticeStore.getState().reset()
     // 4. Tell server to clear the httpOnly cookie (best-effort).
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
+    await authApi.logout().catch(() => {})
     // 5. Clear service worker caches containing sensitive data.
     if ('caches' in window) {
       await Promise.all([

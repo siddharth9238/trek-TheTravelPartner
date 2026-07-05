@@ -7,6 +7,8 @@ import { startAuthentication } from '@simplewebauthn/browser'
 import { authApi, configApi } from '../../api/client'
 import { getApiErrorMessage } from '../../types'
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+
 interface AppConfig {
   has_users: boolean
   allow_registration: boolean
@@ -101,7 +103,7 @@ export function useLogin() {
       if (exchangeInitiated.current) return
       exchangeInitiated.current = true
       setIsLoading(true)
-      fetch('/api/auth/oidc/exchange?code=' + encodeURIComponent(oidcCode), { credentials: 'include' })
+      fetch(`${API_BASE}/api/auth/oidc/exchange?code=` + encodeURIComponent(oidcCode), { credentials: 'include' })
         .then(r => r.json())
         .then(async data => {
           window.history.replaceState({}, '', '/login')
@@ -154,7 +156,7 @@ export function useLogin() {
           // Skip auto-redirect when config is from cache — network is unreliable
           // and auto-redirecting to the IdP could loop if the proxy changed.
           if (!fromCache && !config.password_login && config.oidc_login && config.oidc_configured && config.has_users && !invite && !noRedirect) {
-            window.location.href = '/api/auth/oidc/login'
+            window.location.href = `${API_BASE}/api/auth/oidc/login`
           }
         }
       })

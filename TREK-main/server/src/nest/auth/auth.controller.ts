@@ -48,14 +48,60 @@ const AVATAR_UPLOAD = {
   },
 };
 
-/**
- * Authenticated account endpoints — byte-identical to the legacy Express route
- * (server/src/routes/auth.ts): the same /me/* account ops, avatar upload (with
- * the demo-mode block), settings, key validation, MFA setup/enable/disable, MCP
- * tokens and the short-lived ws/resource tokens. The per-IP rate limits reuse
- * the shared buckets (the inline rateLimiter(5) shares the 'login' bucket, as in
- * the legacy code). create-token answers 201; everything else 200.
- */
+// ============================================================================
+// 1. PUBLIC ROUTES (No Auth Required for Login, Guest, and App Config)
+// ============================================================================
+@Controller('api/auth')
+export class PublicAuthController {
+  constructor(private readonly auth: AuthService, private readonly rl: RateLimitService) {}
+
+  private limit(bucket: string, req: Request, max: number): void {
+    if (!this.rl.check(bucket, req.ip || 'unknown', max, WINDOW, Date.now())) {
+      throw new HttpException({ error: 'Too many attempts. Please try again later.' }, 429);
+    }
+  }
+
+  @Get('app-config')
+  getAppConfig() {
+    return { demoMode: process.env.DEMO_MODE?.toLowerCase() === 'true' };
+  }
+
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    this.limit('login', req, 10);
+    
+    const result = await this.auth.login(body.email, body.password);
+    if (result.error) {
+      throw new HttpException({ error: result.error }, result.status || 401);
+    }
+
+    if (result.token) this.auth.setAuthCookie(res, result.token, req);
+    writeAudit({ userId: result.user.id, action: 'user.login', ip: getClientIp(req) });
+    
+    return { success: true, user: result.user };
+  }
+
+  @Post('guest')
+  @HttpCode(200)
+  async guestLogin(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    this.limit('login', req, 5);
+    
+    const result = await this.auth.guestLogin(); 
+    if (result.error) {
+      throw new HttpException({ error: result.error }, result.status || 500);
+    }
+    
+    if (result.token) this.auth.setAuthCookie(res, result.token, req);
+    writeAudit({ userId: result.user.id, action: 'user.guest_login', ip: getClientIp(req) });
+    
+    return { success: true, user: result.user };
+  }
+}
+
+// ============================================================================
+// 2. PROTECTED ROUTES (Requires valid JWT session)
+// ============================================================================
 @Controller('api/auth')
 @UseGuards(JwtAuthGuard)
 export class AuthController {
@@ -83,8 +129,6 @@ export class AuthController {
     if (result.error) {
       throw new HttpException({ error: result.error }, result.status!);
     }
-    // Refresh this device's cookie with the new password_version so the user
-    // stays logged in here while all other sessions are invalidated.
     if (result.token) this.auth.setAuthCookie(res, result.token, req);
     writeAudit({ userId: user.id, action: 'user.password_change', ip: getClientIp(req) });
     return { success: true };

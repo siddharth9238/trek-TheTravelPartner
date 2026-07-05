@@ -41,7 +41,7 @@ export default function VoiceAssistantPage() {
 
   const handleCommand = async (cmd: string) => {
     try {
-      const response = await fetch('/api/voice/command', {
+      const response = await fetch(`${API_BASE}/api/voice/command`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
