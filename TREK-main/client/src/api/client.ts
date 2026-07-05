@@ -122,14 +122,18 @@ function translateRateLimit(): string {
   }
 }
 
+// Vite uses import.meta.env to read environment variables
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005';
+
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: 'https://trek-thetravelpartner.onrender.com/api',
+  // Notice the /api added here!
+  baseURL: `${API_URL}/api`, 
   withCredentials: true,
   timeout: 8000,
   headers: {
     'Content-Type': 'application/json',
   },
-})
+});
 
 const MUTATING_METHODS = new Set(['post', 'put', 'patch', 'delete'])
 
