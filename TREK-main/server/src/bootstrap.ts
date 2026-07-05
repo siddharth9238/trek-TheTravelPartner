@@ -45,7 +45,7 @@ export async function buildApp(): Promise<INestApplication> {
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: 'Content-Type,Authorization,X-Requested-With,Accept',
+    allowedHeaders: 'Content-Type,Authorization,X-Requested-With,Accept,x-idempotency-key',
     preflightContinue: false,
     optionsSuccessStatus: 204
   });
