@@ -100,6 +100,15 @@ async function bootstrap(): Promise<void> {
   // (/mcp, /.well-known, OAuth SDK, SPA catch-all). buildApp() owns the composition
   // order; it is shared with the integration-test harness so they can't drift.
   nestApp = await buildApp();
+
+  // --- CRITICAL FIX: ENABLE CORS HERE ---
+  nestApp.enableCors({
+    origin: 'https://trek-the-travel-partner-os94c6je2-siddharth229.vercel.app',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+  // --------------------------------------
+
   server = http.createServer(nestApp.getHttpAdapter().getInstance());
   if (HOST) server.listen(PORT, HOST, onListen);
   else server.listen(PORT, onListen);
