@@ -51,7 +51,7 @@ const AVATAR_UPLOAD = {
 // ============================================================================
 // 1. PUBLIC ROUTES (No Auth Required for Login, Guest, Register, and App Config)
 // ============================================================================
-@Controller(['auth', 'api/auth']) // Listens to both!
+@Controller('auth') // Listens to both!
 export class PublicAuthController {
   constructor(private readonly auth: AuthService, private readonly rl: RateLimitService) {}
 
@@ -155,7 +155,7 @@ export class PublicAuthController {
 // ============================================================================
 // 2. PROTECTED ROUTES (Requires valid JWT session)
 // ============================================================================
-@Controller('api/auth')
+@Controller('auth')
 @UseGuards(JwtAuthGuard)
 export class AuthController {
   constructor(private readonly auth: AuthService, private readonly rl: RateLimitService) {}
