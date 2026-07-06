@@ -5,12 +5,6 @@ import { setAuthCookie, clearAuthCookie } from '../../services/cookie';
 import { sendPasswordResetEmail, getAppUrl } from '../../services/notifications';
 import type { User } from '../../types';
 
-/**
- * Thin Nest wrapper around the existing auth service. Token generation, the
- * password/MFA/backup-code crypto, the JWT cookie set/clear and the reset-email
- * delivery all reuse the legacy code unchanged. Access control + audit stay in
- * the controller (mirroring the legacy route handlers).
- */
 @Injectable()
 export class AuthService {
   // Cookie
@@ -26,15 +20,20 @@ export class AuthService {
   demoLogin() { return auth.demoLogin(); }
   validateInviteToken(token: string) { return auth.validateInviteToken(token); }
   
-  // --- FIX: Added register and login methods to match controller expectations ---
-  register(email: string, password: string, name?: string) { 
-    return auth.registerUser({ email, password, name }); 
+  // --- FIX: Pass both name and username to legacy system ---
+  register(email: string, password: string, displayName?: string) { 
+    return auth.registerUser({ 
+      email, 
+      password, 
+      name: displayName,
+      username: displayName 
+    }); 
   }
   
   login(email: string, password: string) { 
     return auth.loginUser({ email, password }); 
   }
-  // -----------------------------------------------------------------------------
+  // ---------------------------------------------------------
 
   registerUser(body: unknown) { return auth.registerUser(body as Parameters<typeof auth.registerUser>[0]); }
   loginUser(body: unknown) { return auth.loginUser(body as Parameters<typeof auth.loginUser>[0]); }
