@@ -12,28 +12,10 @@ const COOKIE_NAME = 'trek_session';
  */
 export type RememberOption = boolean | undefined;
 
-/**
- * Decide whether the session cookie should carry the `Secure` flag.
- *
- * We previously only derived this from `NODE_ENV=production` or
- * `FORCE_HTTPS=true`. That left behind a common self-host setup:
- * TREK running behind Traefik / Caddy / Cloudflare Tunnel with
- * `NODE_ENV=development` locally and no `FORCE_HTTPS` — the cookie
- * went out without `Secure`, even though the public leg was https.
- *
- * Now we also honour `req.secure`, which Express derives from
- * `X-Forwarded-Proto` once `trust proxy` is set (TREK sets it to `1`
- * in production automatically). If Express sees the request was TLS
- * on the outermost hop, the cookie is `Secure`. `COOKIE_SECURE=false`
- * remains the explicit escape hatch for plain-HTTP LAN testing.
- */
 export function cookieOptions(clear = false, req?: Request, remember?: RememberOption) {
-  if (process.env.COOKIE_SECURE?.toLowerCase() === 'false') {
-    return buildOptions(clear, false, remember);
-  }
-  const envSecure = process.env.NODE_ENV?.toLowerCase() === 'production' || process.env.FORCE_HTTPS?.toLowerCase() === 'true';
-  const requestSecure = req?.secure === true;
-  return buildOptions(clear, envSecure || requestSecure, remember);
+  // FIX: We bypass all the environment checks and force 'secure' to true 
+  // because sameSite: 'none' will be instantly rejected by browsers if secure is false.
+  return buildOptions(clear, true, remember);
 }
 
 function resolveMaxAge(remember: RememberOption): { maxAge: number } | Record<string, never> {
@@ -47,8 +29,8 @@ function resolveMaxAge(remember: RememberOption): { maxAge: number } | Record<st
 function buildOptions(clear: boolean, secure: boolean, remember?: RememberOption) {
   return {
     httpOnly: true,
-    secure,
-    sameSite: 'lax' as const,
+    secure: true,              // <-- FIX: Forced to true for cross-domain support
+    sameSite: 'none' as const, // <-- FIX: Changed from 'lax' to 'none' so Vercel/Render frontend can use it
     path: '/',
     ...(clear ? {} : resolveMaxAge(remember)),
   };
