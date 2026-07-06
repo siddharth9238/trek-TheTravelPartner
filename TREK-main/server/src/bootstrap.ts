@@ -40,8 +40,7 @@ export async function buildApp(): Promise<INestApplication> {
   // Must be applied immediately upon creation, before middleware and init
   app.enableCors({
     origin: [
-      'https://trek-the-travel-partner-os94c6je2-siddharth229.vercel.app',
-      'https://trek-thetravelpartner.vercel.app'
+      'https://trek-thetravelpartner-frontend.onrender.com' // Add your new Render URL here
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
