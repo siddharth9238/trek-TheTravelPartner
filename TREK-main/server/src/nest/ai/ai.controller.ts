@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Res, UseGuards, Req, HttpStatus, StreamableFile } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards, Req, HttpStatus } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -13,7 +13,8 @@ interface GeminiResponse {
   }[];
 }
 
-@Controller('api/ai')
+// FIX: Changed from 'api/ai' to 'ai' to prevent double /api/api routing prefix
+@Controller('ai')
 @UseGuards(JwtAuthGuard)
 export class AiController {
   constructor(private readonly aiService: AiService) {}
@@ -133,7 +134,6 @@ export class AiController {
     }
   }
 
-  // Keep existing methods for other phases...
   @Post('itinerary')
   async generateItinerary(
     @Body() body: AiItineraryRequest,

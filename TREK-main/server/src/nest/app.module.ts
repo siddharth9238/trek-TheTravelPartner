@@ -46,25 +46,13 @@ import { TrekExceptionFilter } from './common/trek-exception.filter';
 import { SpaFallbackFilter } from './platform/spa-fallback.filter';
 import { IdempotencyInterceptor } from './common/idempotency.interceptor';
 
-/**
- * Root NestJS module for the incremental migration. Domain modules
- * (weather, notifications, integrations, ...) get registered here as they are
- * migrated.
- */
 @Module({
   imports: [DatabaseModule, WeatherModule, AirportsModule, ConfigModule, SystemNoticesModule, MapsModule, CategoriesModule, TagsModule, NotificationsModule, AtlasModule, VacayModule, PackingModule, TodoModule, BudgetModule, ReservationsModule, DaysModule, AssignmentsModule, PlacesModule, TripsModule, CollabModule, FilesModule, PhotosModule, MemoriesModule, AirtrailModule, JourneyModule, ShareModule, SettingsModule, BackupModule, AuthModule, OidcModule, OauthModule, AdminModule, AddonsModule, BookingImportModule, AiModule, FlightModule, HotelModule, TaxiModule, CarModule, VoiceModule],
   controllers: [HealthController, RootHealthController],
   providers: [
     HealthService,
-    // SPA fallback must run before the generic TREK exception filter so unmatched
-    // GET requests can return the built frontend instead of being normalised as a
-    // generic 404 error envelope.
     { provide: APP_FILTER, useClass: SpaFallbackFilter },
-    // Global error-envelope normaliser (DI-registered so it also catches
-    // framework-level exceptions like the not-found handler).
     { provide: APP_FILTER, useClass: TrekExceptionFilter },
-    // Replays the X-Idempotency-Key the client sends on every write, matching
-    // the legacy applyIdempotency middleware so retried mutations don't double-apply.
     { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
   ],
 })

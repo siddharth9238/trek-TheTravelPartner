@@ -216,7 +216,7 @@ export default function App() {
 
   const showAiChat = isAuthenticated && !isAuthPage && !isSharedPage
 
-return (
+  return (
      <TranslationProvider>
       {!isAuthPage && <SystemNoticeHost />}
       {!isAuthPage && <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
@@ -264,8 +264,9 @@ return (
               </ProtectedRoute>
             }
           />
+          {/* FIX: Wildcard path added here to support deep tab subrouting inside Settings page */}
           <Route
-            path="/settings"
+            path="/settings/*"
             element={
               <ProtectedRoute>
                 <SettingsPage />
@@ -365,7 +366,7 @@ return (
           <Route path="/analytics" element={<ProtectedRoute><AnalyticsPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-{showAiChat && <AiChatWidget />}
+        {showAiChat && <AiChatWidget />}
       </div>
     </TranslationProvider>
   )
