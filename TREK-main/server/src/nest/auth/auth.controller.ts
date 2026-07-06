@@ -51,7 +51,7 @@ const AVATAR_UPLOAD = {
 // ============================================================================
 // 1. PUBLIC ROUTES (No Auth Required for Login, Guest, Register, and App Config)
 // ============================================================================
-@Controller('auth') // Listens to both!
+@Controller('api/auth') // Hardcoded to match frontend exactly
 export class PublicAuthController {
   constructor(private readonly auth: AuthService, private readonly rl: RateLimitService) {}
 
@@ -66,23 +66,22 @@ export class PublicAuthController {
     return { demoMode: process.env.DEMO_MODE?.toLowerCase() === 'true' };
   }
 
-  // --- NEW: Added the missing register endpoint ---
   @Post('register')
   @HttpCode(201)
   async register(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    this.limit('login', req, 5); // Prevent registration spam
+    this.limit('login', req, 5); 
 
     const authAny = this.auth as any;
-    
-    // Check if the service has register or signup implemented
     if (typeof authAny.register !== 'function' && typeof authAny.signup !== 'function') {
       throw new HttpException({ error: 'Registration is not enabled or implemented on this server.' }, 501);
     }
 
-    // Call register (or signup, depending on what the service calls it)
+    // FIX: The frontend sends 'username', but legacy code might want 'name'. We accept both.
+    const displayName = body.username || body.name;
+
     const result = authAny.register 
-      ? await authAny.register(body.email, body.password, body.name)
-      : await authAny.signup(body.email, body.password, body.name);
+      ? await authAny.register(body.email, body.password, displayName)
+      : await authAny.signup(body.email, body.password, displayName);
 
     if (result?.error) {
       throw new HttpException({ error: result.error }, result.status || 400);
@@ -95,14 +94,14 @@ export class PublicAuthController {
     
     return { success: true, user: result?.user };
   }
-  // -------------------------------------------------
 
   @Post('login')
   @HttpCode(200)
   async login(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     this.limit('login', req, 10);
     
-    const result = await (this.auth as any).login(body.email, body.password);
+    const result = await this.auth.login(body.email, body.password);
+    
     if (result?.error) {
       throw new HttpException({ error: result.error }, result.status || 401);
     }
@@ -130,14 +129,7 @@ export class PublicAuthController {
   private async handleDemoLogin(req: Request, res: Response) {
     this.limit('login', req, 5);
     
-    let result: any;
-    if (typeof (this.auth as any).guestLogin === 'function') {
-      result = await (this.auth as any).guestLogin();
-    } else if (typeof (this.auth as any).demoLogin === 'function') {
-      result = await (this.auth as any).demoLogin();
-    } else {
-      result = await (this.auth as any).login('demo@example.com', 'demo123');
-    }
+    const result = await this.auth.demoLogin();
     
     if (result?.error) {
       throw new HttpException({ error: result.error }, result.status || 500);
@@ -155,7 +147,7 @@ export class PublicAuthController {
 // ============================================================================
 // 2. PROTECTED ROUTES (Requires valid JWT session)
 // ============================================================================
-@Controller('auth')
+@Controller('api/auth')
 @UseGuards(JwtAuthGuard)
 export class AuthController {
   constructor(private readonly auth: AuthService, private readonly rl: RateLimitService) {}
@@ -363,6 +355,6 @@ export class AuthController {
     if (!token) {
       throw new HttpException({ error: 'Service unavailable' }, 503);
     }
-    return token;
+    return { token };
   }
 }
