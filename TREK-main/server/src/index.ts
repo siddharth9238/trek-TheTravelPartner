@@ -96,12 +96,13 @@ let nestApp: INestApplication;
 async function bootstrap(): Promise<void> {
   nestApp = await buildApp();
 
-  // FIX: Force CORS as the very first interaction
-  // We apply this to the underlying Express/Fastify adapter directly
+  // FIX 1: Set global prefix to '/api' so routes match the frontend requests
+  nestApp.setGlobalPrefix('api');
+
+  // FIX 2: Force CORS as the very first interaction and include the new Render frontend URL
   nestApp.enableCors({
     origin: [
-      'https://trek-the-travel-partner-os94c6je2-siddharth229.vercel.app',
-      'https://trek-thetravelpartner.vercel.app'
+      'https://trek-thetravelpartner-frontend.onrender.com'
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

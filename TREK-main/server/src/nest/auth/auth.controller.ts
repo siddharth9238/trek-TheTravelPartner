@@ -49,7 +49,7 @@ const AVATAR_UPLOAD = {
 };
 
 // ============================================================================
-// 1. PUBLIC ROUTES (No Auth Required for Login, Guest, and App Config)
+// 1. PUBLIC ROUTES (No Auth Required for Login, Guest, Register, and App Config)
 // ============================================================================
 @Controller(['auth', 'api/auth']) // Listens to both!
 export class PublicAuthController {
@@ -66,12 +66,42 @@ export class PublicAuthController {
     return { demoMode: process.env.DEMO_MODE?.toLowerCase() === 'true' };
   }
 
+  // --- NEW: Added the missing register endpoint ---
+  @Post('register')
+  @HttpCode(201)
+  async register(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    this.limit('login', req, 5); // Prevent registration spam
+
+    const authAny = this.auth as any;
+    
+    // Check if the service has register or signup implemented
+    if (typeof authAny.register !== 'function' && typeof authAny.signup !== 'function') {
+      throw new HttpException({ error: 'Registration is not enabled or implemented on this server.' }, 501);
+    }
+
+    // Call register (or signup, depending on what the service calls it)
+    const result = authAny.register 
+      ? await authAny.register(body.email, body.password, body.name)
+      : await authAny.signup(body.email, body.password, body.name);
+
+    if (result?.error) {
+      throw new HttpException({ error: result.error }, result.status || 400);
+    }
+
+    if (result?.token) this.auth.setAuthCookie(res, result.token, req);
+    if (result?.user?.id) {
+      writeAudit({ userId: result.user.id, action: 'user.register', ip: getClientIp(req) });
+    }
+    
+    return { success: true, user: result?.user };
+  }
+  // -------------------------------------------------
+
   @Post('login')
   @HttpCode(200)
   async login(@Body() body: any, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     this.limit('login', req, 10);
     
-    // Safely cast to any to bypass strict Typescript build errors if types don't perfectly match
     const result = await (this.auth as any).login(body.email, body.password);
     if (result?.error) {
       throw new HttpException({ error: result.error }, result.status || 401);
@@ -85,7 +115,6 @@ export class PublicAuthController {
     return { success: true, user: result?.user };
   }
 
-  // Map both guest and demo-login to ensure compatibility with your frontend
   @Post('guest')
   @HttpCode(200)
   async guestLogin(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
@@ -102,13 +131,11 @@ export class PublicAuthController {
     this.limit('login', req, 5);
     
     let result: any;
-    // Safely attempt to find the correct guest login method on the AuthService
     if (typeof (this.auth as any).guestLogin === 'function') {
       result = await (this.auth as any).guestLogin();
     } else if (typeof (this.auth as any).demoLogin === 'function') {
       result = await (this.auth as any).demoLogin();
     } else {
-      // Hard fallback if a dedicated guest method isn't found
       result = await (this.auth as any).login('demo@example.com', 'demo123');
     }
     
