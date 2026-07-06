@@ -17,7 +17,7 @@ import { searchNominatim } from '../../services/mapsService';
  * @trek/shared/weather and are used for typing; `lang` defaults to 'de' only when
  * the param is absent, matching the Express destructuring default.
  */
-@Controller('weather') // <-- FIX: Changed from 'api/weather' to 'weather'
+@Controller('api/weather') // <-- FIX: Changed from 'api/weather' to 'weather'
 @UseGuards(JwtAuthGuard)
 export class WeatherController {
   constructor(private readonly weather: WeatherService) {}
