@@ -25,6 +25,17 @@ export class AuthService {
   getAppConfig(user: User | undefined) { return auth.getAppConfig(user); }
   demoLogin() { return auth.demoLogin(); }
   validateInviteToken(token: string) { return auth.validateInviteToken(token); }
+  
+  // --- FIX: Added register and login methods to match controller expectations ---
+  register(email: string, password: string, name?: string) { 
+    return auth.registerUser({ email, password, name }); 
+  }
+  
+  login(email: string, password: string) { 
+    return auth.loginUser({ email, password }); 
+  }
+  // -----------------------------------------------------------------------------
+
   registerUser(body: unknown) { return auth.registerUser(body as Parameters<typeof auth.registerUser>[0]); }
   loginUser(body: unknown) { return auth.loginUser(body as Parameters<typeof auth.loginUser>[0]); }
   requestPasswordReset(email: string, ip: string) { return auth.requestPasswordReset(email, ip); }
